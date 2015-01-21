@@ -25,31 +25,37 @@
 		<canvas id="layer6" style="z-index: 13;" height="600" width="1224"></canvas>
 		<canvas id="layer7" style="z-index: 14;" height="600" width="1224"></canvas>
 		<canvas id="layer8" style="z-index: 8;" height="600" width="1224"></canvas>
-		<canvas id="layer9" style="z-index: 9;" height="600" width="1224"></canvas>
+		<canvas id="layer9" style="z-index: 9;" height="600" width="1224">
+		This text is displayed if your browser does not support HTML5 Canvas.</canvas>
 	</div>
     
 <script>
 // Interface declarations and functions
 setTargetAddress('192.168.7.2', { initialized: ledsOff } );
 
-var pinBlink = []; var inputRead = [];
-var usrText = ['USR0','USR1','USR2','USR3']; var analog = [];
-var outputPin; var activePins = [];
+var address = '192.168.7.2';
+setTargetAddress(address, { initialized: ledsOff } );
 
+// ***********************
+// * BONESCRIPT FUNTIONS *
+// ***********************
+
+// var activePins = [];
 // toggle pin on/off or blink
 function pinChange(data){
     var b = require('bonescript');
     if(!b) return;
-    var len = activePins.length; var duplicate;
-    for (var i=0; i<len; i++){
-        if (data.id === activePins[i].id){
-            duplicate = true;
-        }
-    }
-    if (duplicate !== true){
-        activePins[len] = {id: data.id, type: data.type, subType: data.subType,
-        num: data.num}; 
-    }
+    // collects active pins
+    // var len = activePins.length; var duplicate;
+    // for (var i=0; i<len; i++){
+    //     if (data.id === activePins[i].id){
+    //         duplicate = true;
+    //     }
+    // }
+    // if (duplicate !== true){
+    //     activePins[len] = {id: data.id, type: data.type, subType: data.subType,
+    //     num: data.num}; 
+    // }
     if (data.type === 'usr leds' || data.subType != "input" &&
         data.subType != "pwm"){ 
         b.pinMode(data.id,b.OUTPUT);
@@ -58,12 +64,14 @@ function pinChange(data){
                   data.state = data.state ? 0 : 1;
                   b.digitalWrite(data.id, data.state);
               } 
-              else{
+              else {
                   b.digitalWrite(data.id, 1);
+                  data.state = 1;
               }
         }
-        else{
+        else {
               b.digitalWrite(data.id, 0);
+              data.state = 0;
         }
     }
     else if (data.subType === "pwm"){
@@ -74,10 +82,9 @@ function pinChange(data){
             b.analogWrite(data.id, 0);
         }
     }
-}
-
-// turn leds off once html loaded
-function ledsOff(data) {
+};
+// turn leds off
+function ledsOff() {
     var b = require('bonescript');
     if(!b) return;
     b.pinMode('USR0', b.OUTPUT);
@@ -88,42 +95,76 @@ function ledsOff(data) {
     b.digitalWrite('USR1', 0);
     b.digitalWrite('USR2', 0);
     b.digitalWrite('USR3', 0);
-}
-
+};
 // get analog values once pin connected
-function start(data){
+function getAnalog(data){
     var b = require('bonescript');
     if(!b) return;
-    analog[0] = data.num;
     if (data.power === "on"){
         b.analogRead(data.id,analogValue);
     }
-}
-
-// retrieve the analog value and send it back
-function analogValue(x){
-    var currentValue = x.value*1.8;
-    analog[1] = currentValue;
-    voltageValue(analog);
-}
-
-
+    function analogValue(x){
+        var len = pin[data.num].volt.length;
+        pin[data.num].volt.push(x.value*1.8);
+    };
+};
 // check to see if input on
-function checkInput(data){
+function inputRead(data){
     var b = require('bonescript');
     if(!b) return;
-    b.pinMode(data.id, b.INPUT);
-    b.pinMode(data.output, b.OUTPUT);
-    outputPin = data.output;
-    b.digitalRead(data.id, checkPin); 
-}
+    if (data.power === "on"){
+        b.pinMode(data.id, b.INPUT);
+        b.digitalRead(data.id, checkPin); 
+    }
+    function checkPin(x){
+        var currentState;
+        if(x.value == 1){
+            pin[data.num].volt.push(3.3);
+            currentState = "on";
+        }
+        else {
+            pin[data.num].volt.push(0);
+            currentState = "off";
+        }
+        if (currentState != pin[data.num].prev){
+            pin[data.num].change = true;
+            pin[data.num].drawLED();
+        }
+        else { pin[data.num].change = false;}
+        pin[data.num].prev = currentState;
+    }
+};
 
-
+// would clear currently on pins before onload
+// function clearPins(){
+//   	for (var i = 0; i<4; i++){
+// 		 b.digitalWrite(usrText[i], b.LOW);
+// 	}
+//     var len = activePins.length;
+//     for (var j=0; j<len; j++){
+//         console.log(activePins[j].id);
+//         if (activePins[j].type === "digital"){
+//             if (activePins[j].subType === "input"){
+//                 clearInterval(inputRead[activePins[j].num]);
+//             }
+//             else if (activePins[j].subType === "pwm"){
+//                 b.analogWrite(activePins[j].id, 0);
+//             }
+//             else{clearInterval(pinBlink[activePins[j].num]);
+//                 b.digitalWrite(activePins[j].id, 0);
+//             }  
+//         }
+//         else { clearInterval(pinBlink[activePins[j].num]);
+//             b.pinMode(activePins[j].id,b.OUTPUT);
+//             b.digitalWrite(activePins[j].id, 0);
+//         }
+//     }  
+//         console.log('Disconnected, turning off lights');
+// };
 
 // ****************************************
 // * INITIALIZATION/CREATION OF VARIABLES *
 // ****************************************
-
 // canvas with bb and other unchanging elements
 var canvasBase = document.getElementById('layer1');
 var ctxBase = canvasBase.getContext("2d");
