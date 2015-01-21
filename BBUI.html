@@ -6,13 +6,42 @@
 <script src="http://beagleboard.org/static/bonescript.js"></script>
         <style>
 			canvas {
-			position: absolute;
-			left:0px;
-			top:0px;
-			bottom:0px;
-			right: 0px;
-			margin: auto;
+			    position: absolute;
+			    left:0px;
+			    top:30px;
+			    right: 0px;
+			    margin: auto;
 			}
+            input[type="text"] {
+                font-family: Andale Mono, Courier;
+                border: solid 1px #696869;
+            }
+            input[type="text"]:focus{
+                border: solid 1px #707070;
+                box-shadow: 0 0 5px 1px #969696;
+            }
+            input[type="button"]{
+	            border : solid 1px #696869;
+	            border-radius : 3px;
+	            font-size : 12px;
+	            font-family: Andale Mono, Courier;
+	            color : #696869;
+	            padding : 1px 17px;
+	            background : #ffffff;
+            }
+            input[type="button"]:hover{
+	            border : solid 1px #696869;
+	            border-radius : 3px;
+	            font-size : 12px;
+	            font-family: Andale Mono, Courier;
+	            color : #ffffff;
+	            padding : 1px 17px;
+	            background : #696869;
+            }
+            #form{
+                font-family: Andale Mono, Courier;
+                font-size:12px;
+            }
 		</style>	
     </head>
     <body> 
@@ -28,10 +57,19 @@
 		<canvas id="layer9" style="z-index: 9;" height="600" width="1224">
 		This text is displayed if your browser does not support HTML5 Canvas.</canvas>
 	</div>
-    
+	<div id="form">
+            Beaglebone IP Address:
+            <input type="text" id="IP" name="address" value="192.168.7.2"> 
+            <input type="button" value=submit onclick="changeIP()">
+    </div>
 <script>
+
+
+function changeIP(){
+    var address = document.getElementById("IP").value;
+}
+
 // Interface declarations and functions
-setTargetAddress('192.168.7.2', { initialized: ledsOff } );
 
 var address = '192.168.7.2';
 setTargetAddress(address, { initialized: ledsOff } );
