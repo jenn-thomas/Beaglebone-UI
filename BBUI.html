@@ -239,13 +239,15 @@ var outputBTN = {x: btnX + 78, y: btnY + 40, endX: btnX + 153, endY: btnY + 55, 
 	text: "output", s:13, offColor: 'rgb(0,85,85)', barColor:'rgb(153,255,255)', article: "a digital pin"};
 var pwmBTN = {x: btnX + 78, y: btnY + 60, endX: btnX + 153, endY: btnY + 75, color: 'rgb(153,0,153)',
 	text: "pwm", s:25, offColor: 'rgb(51,0,102)',barColor:'rgb(229,204,255)', article: "a pwm pin"};
+
+var btnCount = 0;
 	
 // colors for graph
-var analogColor = ['rgb(0,0,255)','rgb(0,01,53)','rgb(0,102,204)','rgb(0,51,102)'];
-var inputColor = ['rgb(0,51,0)', 'rgb(0,204,0)', 'rgb(51,102,0)', 'rgb(0,255,0)','rgb(128,255,0)'];
-var outputColor = ['rgb(60,179,113)', 'rgb(0,153,153)', 'rgb(0,255,255)', 'rgb(0,102,102)'];
-var pwmColor = ['rgb(102,0,102)', 'rgb(204,0,204)', 'rgb(255,102,255)', 'rgb(51,0,51)'];
-var ledColor = ['rgb(255,128,0)', 'rgb(164,60,0)', 'rgb(255,99,71)', 'rgb(255,69,0)'];
+var analogColor = ['rgba(0,0,255,.7)','rgba(0,1,53,.7)','rgba(0,102,204,.7)','rgba(0,51,102,.7)','rgba(0,0,153,.7)','rgba(0,0,102,.7)'];
+var inputColor = ['rgba(0,51,0,.7)', 'rgba(0,204,0,.7)', 'rgba(51,102,0,.7)', 'rgba(0,255,0,.7)','rgba(128,255,0,.7)','rgba(0,102,0,.7)','rgba(0,153,0,.7)'];
+var outputColor = ['rgba(60,179,113,.7)', 'rgba(0,153,153,.7)', 'rgba(0,255,255,.7)', 'rgba(0,102,102,.7)'];
+var pwmColor = ['rgba(102,0,102,.7)', 'rgba(204,0,204,.7)', 'rgba(255,102,255,.7)', 'rgba(51,0,51,.7)','rgba(102,0,51,.7)','rgba(153,51,255,.7)'];
+var ledColor = ['rgba(255,128,0,.7)', 'rgba(164,60,0,.7)', 'rgba(255,99,71,.7)', 'rgba(255,69,0,.7)'];
 var graphLinePos = BBposY + 40;
 	
 // all graph global variables
@@ -267,17 +269,17 @@ var interval = 0; var status; var timeValues = []; var btnCheck = false; var vol
 //initialize coordinate positions for LEDs
     var USRY = BBposY + 27;
     var USRX = [230.5, 241.75, 253, 264.25]; 
-      for (var i = 0; i<4; i++){
-			   USRX[3-i] += BBposX;
-			};
+    for (var i = 0; i<4; i++){
+	    USRX[3-i] += BBposX;
+	};
 //create USR LEDs
    	var USR = [];
-    	for (var i = 0; i<4; i++){
-        	num = i;
-        	name = USRtext[i];
-        	USR[i] = new createUSR(USRX[3-i],USRY, num, name);  	
-        	USR[i].state = 0;
-        	};
+    for (var i = 0; i<4; i++){
+        num = i;
+        name = USRtext[i];
+        USR[i] = new createUSR(USRX[3-i],USRY, num, name);  	
+        USR[i].state = 0;
+    };
  
 // pin positions        	
 for (var i = 0; i < 46; i++){
@@ -293,7 +295,7 @@ for (var i = 0; i < 46; i++){
 	}
 	pinPosY[i] = y; pinPosX[i] = x;
 	pinPosX[i + 46] = x + 273; pinPosY[i+46] = y;
-	}
+}
 
 // initialize all pins with corresponding properties
 for (var i = 0; i < 96; i++){
@@ -304,14 +306,14 @@ for (var i = 0; i < 96; i++){
 		if  ((0<=i && i < 2) || (i === 33) || (42 <= i && i <= 47)){
 			pin[i] = new createPin(pinPosX[i],pinPosY[i],matrix[j],"GND",i);
 		}
-		else if ((2 <= i && i < 8) || (i === 31)){
+		else if ((2 <= i && i <= 3) || (6 <= i  && i < 8) || (i === 31)){
 			pin[i] = new createPin(pinPosX[i],pinPosY[i],matrix[j],"power",i);
 		}
-		else{pin[i] = new createPin(pinPosX[i],pinPosY[i],matrix[j],"reset",i)};
+ 		else{pin[i] = new createPin(pinPosX[i],pinPosY[i],matrix[j],"none",i)};
 	}
-	else if ((10 <= i && i <= 17) || (20 <= i && i<= 30) || (40 <= i && i <= 42)
-			|| (48 <= i && i <= 91)){
-			if (i == 13 || i == 15 || i == 20 || i == 21 || i == 41 || i == 58 || i == 64){
+	else if ((10 <= i && i <= 16) || (20 <= i && i<= 22) || (56 <= i && i <= 63) 
+	        || ([26,29,40,41,71].indexOf(i) != -1)){
+			if ([13,15,20,21,41,58,64].indexOf(i) != -1){
 				pin[i] = new createPin(pinPosX[i],pinPosY[i],matrix[j],"digital",i);
 				pin[i].subType = "none"; pin[i].PWM = "yes";
 			}
@@ -334,16 +336,16 @@ for (var i = 0; i < 96; i++){
 };
 
 // draw beagleboard		
-   	var beagleBone = new Image();
-      	beagleBone.src = 'http://i1382.photobucket.com/albums/ah247/jennifer_thomas8/beaglebone_zps8b842e07.png';
-      	beagleBone.onload = function() {
-        	ctxBase.drawImage(beagleBone, BBposX, BBposY);
-        	};
+var beagleBone = new Image();
+    beagleBone.src = 'beaglebone.png';
+    beagleBone.onload = function() {
+        ctxBase.drawImage(beagleBone, BBposX, BBposY);
+    };
 
-//// draw gray background, buttons, and graph
+// draw gray background, buttons, and graph
 drawGraph();
 ctxBase.fillStyle = 'rgb(225,225,225)';
-ctxBase.fillRect(rect.x,rect.y,rect.w,rect.h)
+ctxBase.fillRect(rect.x,rect.y,rect.w,rect.h);
 ctxBase.strokeStyle = 'rgb(255,255,255)';
 ctxBase.lineWidth = 3;
 ctxBase.strokeRect(rect.x + 20,rect.y + 15,420,510);
@@ -353,22 +355,8 @@ welcomeMessage('white');
 // **************************************
 // * EVENTS AND CORRESPONDING FUNCTIONS *
 // **************************************
-
-// event listeners
-
-// receive analog voltage from server
-function voltageValue(pinData){
-    var len = pin[pinData[0]].volt.length;
-    pin[pinData[0]].volt[len] = pinData[1];
-}
- 
- // eventually draw led next to output when input on
-// socket.on('outputStatus', function (output){
-//     pin[output[0]].power = output[1];
-// 	drawLED(pin[output[0]]);
-// });
-
-// when a button is added, two new canvases are created
+// when a button is added, two new canvases are created, one for plotting voltage,
+// the other for light indicator next to the button
 function createCanvas(pin){
 	var len = canvas.length;
 	canvas[len] = document.createElement('canvas');
@@ -378,8 +366,7 @@ function createCanvas(pin){
 	canvas[len].style.zIndex = 10;
 	canvas[len].style.left = 0;
 	canvas[len].style.right = 0;
-	canvas[len].style.top = 0;
-	canvas[len].style.bottom = 0;
+	canvas[len].style.top = 30;
 	canvas[len].style.margin = 'auto';
 	canvas[len].style.position = "absolute";
 	document.body.appendChild(canvas[len]);
@@ -392,37 +379,31 @@ function createCanvas(pin){
 	canvasGraph[len+1].style.zIndex = 10;
 	canvasGraph[len+1].style.left = 0;
 	canvasGraph[len+1].style.right = 0;
-	canvasGraph[len+1].style.top = 0;
-	canvasGraph[len+1].style.bottom = 0;
+	canvasGraph[len+1].style.top = 30;
 	canvasGraph[len+1].style.margin = 'auto';
 	canvasGraph[len+1].style.position = "absolute";
-	//canvasGraph[len+1].style.border = "1px solid"; //test
 	document.body.appendChild(canvasGraph[len+1]);
 	ctxGraph[len+1] = canvasGraph[len+1].getContext('2d');
 	pin.ctxGraph = ctxGraph[len+1]; pin.canvasGraph = canvasGraph[len+1];
 };
-
 // find position of mouse
 function Position(event){
-       var x; 
-       var y;
-
-       if (event.x != undefined && event.y != undefined){
-          	x = event.x;
-          	y = event.y; }
-       else // Firefox method to get the position
-        {
-          	x = event.clientX + document.body.scrollLeft +
-            document.documentElement.scrollLeft;
-         	y = event.clientY + document.body.scrollTop +
-            document.documentElement.scrollTop; }
-
+    var x; 
+    var y;
+    if (event.x != undefined && event.y != undefined){
+        x = event.x;
+        y = event.y; }
+    else { // Firefox method to get the position
+        x = event.clientX + document.body.scrollLeft +
+        document.documentElement.scrollLeft;
+        y = event.clientY + document.body.scrollTop +
+        document.documentElement.scrollTop; 
+    }
         x -= canvasBase.offsetLeft;
         y -= canvasBase.offsetTop;
         var coord = [x,y];
 		return coord;
-                };
-                
+};            
 // event listeners for welcome message
 function exitHover(event){
     var coord = Position(event);
@@ -434,8 +415,7 @@ function exitHover(event){
 		welcomeMessage('black');
 	}
 	else{welcomeMessage('white');}
-}        
-
+};        
 // if click on exit, remove welcome message and reinstate all other listeners
 function exit(event){
 	var coord = Position(event);
@@ -451,8 +431,7 @@ function exit(event){
 		document.addEventListener('click', clicked, false);
 		document.addEventListener('mousemove', btnInfo, false);
 	}
-}
-
+};
 // on mousemove, if over button, display associated pins
 function btnInfo(event){
 	var coord = Position(event);
@@ -460,13 +439,13 @@ function btnInfo(event){
 	var y = coord[1];
 	ctxActive.clearRect(0,0,canvasActive.width,canvasActive.height)
 	if (x >= analogBTN.x && x <= analogBTN.endX  && y >= analogBTN.y && 
-			y <= analogBTN.endY){
-			roundRect(analogBTN, 75, 15,1,ctxActive,true);
-		for (i = 32; i<40; i++){
-			if (pin[i].type === "analog"){
-				hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
-			}
-		}
+		    y <= analogBTN.endY){
+		    roundRect(analogBTN, 75, 15,1,ctxActive,true);
+		    for (i = 32; i<40; i++){
+			    if (pin[i].type === "analog"){
+				    pin[i].hover();
+			    }
+		    }
 	}
 	else if (x >= digitalBTN.x && x <= digitalBTN.endX  && y >= digitalBTN.y && 
 			y < digitalBTN.endY){
@@ -480,7 +459,7 @@ function btnInfo(event){
 			roundRect(pwmBTN, 75, 15,1,ctxActive,false);
 			for (i = 0; i<92; i++){
 				if (pin[i].type === "digital"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+					pin[i].hover();
 				}
 			}
 	}
@@ -489,7 +468,7 @@ function btnInfo(event){
 			roundRect(gndBTN, 75, 15,1,ctxActive,true);
 			for (i = 0; i<50; i++){
 				if (pin[i].type === "GND"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+					pin[i].hover();
 				}
 			}
 	}
@@ -498,7 +477,7 @@ function btnInfo(event){
 			roundRect(powerBTN, 75, 15,1,ctxActive,true);
 			for (i = 0; i<32; i++){
 				if (pin[i].type === "power"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+					pin[i].hover();
 				}
 			}
 	}
@@ -507,12 +486,11 @@ function btnInfo(event){
 			roundRect(ledBTN, 75, 15,1,ctxActive,true);
 			for (i = 92; i<96; i++){
 				if (pin[i].type === "usr leds" && pin[i].select === "off"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+					pin[i].hover();
 				}
 			}
 	}
-}
-
+};
 // if over digital button, show types
 function digitalMenu(event){
 	var coord = Position(event);
@@ -522,7 +500,7 @@ function digitalMenu(event){
 	if (x >= digitalBTN.x && x <= digitalBTN.endX  && y >= digitalBTN.y && 
 			y < digitalBTN.endY){
 			// already called on btninfo, but needed to ensure event listener on
-			}
+	}
 	else if (x >= inputBTN.x && x <= inputBTN.endX  && y >= inputBTN.y - 5 && 
 			y <= inputBTN.endY){
 			ctxActive.fillStyle = 'rgba(255,255,255,.7)';
@@ -533,10 +511,10 @@ function digitalMenu(event){
 			roundRect(pwmBTN, 75, 15,1,ctxActive,false);
 			for (i = 0; i<92; i++){
 				if (pin[i].type === "digital"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+					pin[i].hover();
 				}
 			}
-			}
+	}
 	else if (x >= outputBTN.x && x <= outputBTN.endX  && y >= outputBTN.y - 5 && 
 			y <= outputBTN.endY){
 			ctxActive.fillStyle = 'rgba(255,255,255,.7)';
@@ -547,10 +525,10 @@ function digitalMenu(event){
 			roundRect(pwmBTN, 75, 15,1,ctxActive,false);
 			for (i = 0; i<92; i++){
 				if (pin[i].type === "digital"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+					pin[i].hover();
 				}
 			}
-			}
+	}
 	else if (x >= pwmBTN.x && x <= pwmBTN.endX  && y >= pwmBTN.y -5 && 
 			y <= pwmBTN.endY){
 			ctxActive.fillStyle = 'rgba(255,255,255,.7)';
@@ -561,15 +539,14 @@ function digitalMenu(event){
 			roundRect(pwmBTN, 75, 15,1,ctxActive,true);
 			for (i = 0; i<92; i++){
 				if (pin[i].PWM === "yes"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+					pin[i].hover();
 				}
 			}
-		}
+	}
 	else{document.removeEventListener('mousemove',digitalMenu,false);
 		document.removeEventListener('mousedown',clickDownDigital,false);
 	}
-}
-
+};
 // if clicked on global button, slider, or graph button
 function clickDown(event){
 	var coord = Position(event);
@@ -601,37 +578,37 @@ function clickDown(event){
  			if(bar[i].sliderX < bar[i].barLocX+2){ 
     				bar[i].sliderX = bar[i].barLocX+2;
     				pin[bar[i].pin].freq = 0;
-    			}
+    		}
     		else if (bar[i].sliderX > bar[i].barLength + bar[i].barLocX-12)
     			{bar[i].sliderX = bar[i].barLength + bar[i].barLocX - 12;}
     			if (bar[i].type === "PWM"){
- 				bar[i].frequency = ((bar[i].sliderX - bar[i].barLocX -2)/140).toPrecision(2);}
- 				else{bar[i].frequency = ((bar[i].sliderX - bar[i].barLocX - 2)/14).toPrecision(2);}
+ 				    bar[i].frequency = ((bar[i].sliderX - bar[i].barLocX -2)/140).toPrecision(2);}
+ 				else { bar[i].frequency = ((bar[i].sliderX - bar[i].barLocX - 2)/14).toPrecision(2);}
  				if (bar[i].type === "PWM"){
     				pin[bar[i].pin].freq = bar[i].frequency;
     			}
-    			else{pin[bar[i].pin].freq = bar[i].frequency*1000;}
+    			else { pin[bar[i].pin].freq = bar[i].frequency*1000;}
   				if (pin[bar[i].pin].freq != 0 && pin[bar[i].pin].power === 'on'){
   					blink(pin[bar[i].pin]);
   				}
   				else if (pin[bar[i].pin].power === 'on'){
-  					drawLED(pin[bar[i].pin]);
+  					pin[bar[i].pin].drawLED();
   				}
   				if (bar[i].type === "PWM"){
     				bar[i].text = (bar[i].frequency).toString();
     			}
-    			else{bar[i].text = bar[i].frequency.toString() + ' s';}
+    			else { bar[i].text = bar[i].frequency.toString() + ' s';}
  				bar[i].move = 'on';
  				document.addEventListener('mousemove', slideBar, false);
  				drawBar();
 		}
 	}
-// if on zoom in (plus sign)
+    // if on zoom in (plus sign)
 	if (x <= plus.endX && x >= plus.x && y >= (plus.y - 15) && y <= plus.endY){
 		document.addEventListener('mouseup', zooming, false);
 	 	zoomChange("in");
 	 	ctxGraph[0].fillStyle = "#FF4500";
-	 	ctxGraph[0].font = '20pt Lucinda Grande';
+	 	ctxGraph[0].font = '20pt Lucinda Grande, Lucida';
 		ctxGraph[0].fillText("+", plus.x, plus.y);
 	} 
 	// if on zoom out (minus sign)
@@ -639,7 +616,7 @@ function clickDown(event){
 		document.addEventListener('mouseup', zooming, false);
 	 	zoomChange("out");
 		ctxGraph[0].fillStyle = "#FF4500";
-		ctxGraph[0].font = '30pt Lucinda Grande';
+		ctxGraph[0].font = '30pt Lucinda Grande, Lucida';
 		ctxGraph[0].fillText("-", minus.x, minus.y);
 	} 
 	// if on stop button
@@ -664,7 +641,6 @@ function clickDown(event){
     	document.addEventListener('mouseup', record, false);
     	}
 };
-
 // if click on/off button
 function clicked(event){
 	var coord = Position(event);
@@ -673,43 +649,49 @@ function clicked(event){
 	var len = btn.length;
 	// if new pin selected and now connected to led
 	if (newPin === 'active'){
-		pin[currentPin].power = "on";
-		drawLED(pin[currentPin]);
-		voltagePin.push(pin[currentPin].num);
+	    pin[currentPin].power = "on";
+	    voltagePin.push(pin[currentPin].num);
 		getVoltage(pin[currentPin]);
+		pin[currentPin].drawLED();
   		newPin = 'unactive'; 
 	}
 	for (var i = 0; i<len;i++){
+	    var j = btn[i].pinNum;
 		if(x >= btn[i].xOnOff && x <= btn[i].xOnOff + 25 && y >= btn[i].yOnOff && 
- 			y <= btn[i].yOnOff + btn[i].h && (pin[btn[i].pinNum].power === 'off')){
-			if (pin[btn[i].pinNum].freq != 0){
-					pin[btn[i].pinNum].HIGH = 1; pin[btn[i].pinNum].power = 'on';
-					blink(pin[btn[i].pinNum]);
-					on(btn[i]); 
+ 			y <= btn[i].yOnOff + btn[i].h && (pin[j].power === 'off')){
+			if (pin[j].freq != 0){
+					pin[j].HIGH = 1; pin[j].power = 'on';
+					blink(pin[j]);
+					btn[i].on(); 
 			}
 			else { 
-				pin[btn[i].pinNum].power = 'on'; on(btn[i]);
-                if (pin[btn[i].pinNum].type === 'analog'){
-                    var data =  {num: pin[btn[i].pinNum].num, id: pin[btn[i].pinNum].id,
-                    power: pin[btn[i].pinNum].power};
-                    clearInterval(pin[btn[i].pinNum].getVoltage);
-     	            pin[btn[i].pinNum].getVoltage = setInterval(function(){start(data)}, 50);
+				pin[j].power = 'on'; btn[i].on();
+                if (pin[j].type === 'analog'){
+                    var data =  {num: pin[j].num, id: pin[j].id,
+                    power: pin[j].power};
+                    clearInterval(pin[j].getVoltage);
+     	            pin[j].getVoltage = setInterval(function(){getAnalog(data)}, 50);
                 }
-				    drawLED(pin[btn[i].pinNum]);
+                else if (pin[j].subType === 'input'){
+                    var data =  {num: pin[j].num, id: pin[j].id,
+                        power: pin[j].power}; 
+                    clearInterval(pin[j].getVoltage);
+                    pin[j].change = true;
+                    pin[j].getVoltage = setInterval(function(){inputRead(data)}, 50);
+                }
+				    pin[j].drawLED();
  		    }
-		 }
+		}
 		else if(x >= btn[i].xOnOff + 25 && x <= btn[i].xOnOff + 50  && y >= btn[i].yOnOff && 
- 		y <= btn[i].yOnOff + btn[i].h && (pin[btn[i].pinNum].power === 'on')){
-			clearInterval(pin[btn[i].pinNum].blinking);
-			pin[btn[i].pinNum].power = 'off'; pin[btn[i].pinNum].HIGH = 1;
-			off(btn[i]);
-            if (pin[btn[i].pinNum].type === 'analog')
-            {   var data =  {num: pin[btn[i].pinNum].num, id: pin[btn[i].pinNum].id,
-                power: pin[btn[i].pinNum].power};
-                clearInterval(pin[btn[i].pinNum].getVoltage);
-                pin[btn[i].pinNum].getVoltage = setInterval(function(){zeroVolt(data)}, 50);
+ 		y <= btn[i].yOnOff + btn[i].h && (pin[j].power === 'on')){
+			clearInterval(pin[j].blinking);
+			pin[j].power = 'off'; pin[j].HIGH = 1;
+			btn[i].off();
+            if (pin[j].type === 'analog' || pin[j].subType === 'input') {   
+                clearInterval(pin[j].getVoltage);
+                pin[j].getVoltage = setInterval(function(){zeroVolt(j)}, 50);
             }
-			drawLED(pin[btn[i].pinNum]);
+			pin[j].drawLED();
 		}
 	}
 };
@@ -738,7 +720,6 @@ function clickDownDigital(event){
 	}
 	document.removeEventListener('mousemove',digitalMenu,false);
 }
-
 // dragging button to position
 function activateBtn(event){
 	document.removeEventListener('mousemove',btnInfo,false);
@@ -758,14 +739,13 @@ function activateBtn(event){
 	}
 	for (var i = 0; i<96; i++){
 		if (btnType.text === "pwm" && pin[i].PWM == "yes"){
-			hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+			pin[i].hover();
 		}
 		else if (pin[i].type === pinType){
-			hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+			pin[i].hover();
 		}
 	}
-}
-
+};
 // button released after dragging, slider released
 function release(event){
  	var coord = Position(event);
@@ -776,26 +756,29 @@ function release(event){
 	// releasing button on canvas
 	if (btnStatus === "active"){
 		document.removeEventListener('mousemove', activateBtn, false);
-			if (x >= rectInner.x && x <= (rectInner.x+rectInner.w)  && y >= rectInner.y 
-				&& y <= rectInner.y + rectInner.h && btnCheck === true){
-				btn.push(new createBtn(snapPosPin.x,snapPosPin.y,btnType.text));
-				drawBtn(75,15,snapPosPin.x,snapPosPin.y,ctxBTN,btnType,btnType.s,btnType.text,1,false);
-				snapPosPin.y += btnHeight*1.5;
-				document.addEventListener('mousemove', selectPin, false);
- 				ctxBase.fillStyle= 'red';
-				ctxBase.font = '12pt Andale Mono';
-				ctxBase.fillText("select " + btnType.article, BBposX + 10, BBposY-25);
-			for (var i = 0; i<96; i++){
-				if (btnType.text === "pwm" && pin[i].PWM == "yes"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
-				}
-				else if (pin[i].type === pinType && pin[i].select === "off"){
-					hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
-			}
-		}
-			}
-			else{document.addEventListener('mousemove', btnInfo, false);
-            document.addEventListener('mousedown', clickDown, false);}
+		    if (btnCount < 15){
+			    if (x >= rectInner.x && x <= (rectInner.x+rectInner.w)  && y >= rectInner.y 
+				    && y <= rectInner.y + rectInner.h && btnCheck === true){
+				    btn.push(new createBtn(snapPosPin.x,snapPosPin.y,btnType.text));
+				    btnCount++
+				    drawBtn(75,15,snapPosPin.x,snapPosPin.y,ctxBTN,btnType,btnType.s,btnType.text,1,false);
+				    snapPosPin.y += btnHeight*1.5;
+				    document.addEventListener('mousemove', selectPin, false);
+ 				    ctxBase.fillStyle= 'red';
+				    ctxBase.font = '12pt Andale Mono, Courier';
+				    ctxBase.fillText("select " + btnType.article, BBposX + 10, BBposY-25);
+			        for (var i = 0; i<96; i++){
+				        if (btnType.text === "pwm" && pin[i].PWM == "yes"){
+					        pin[i].hover();
+				        }
+				        else if (pin[i].type === pinType && pin[i].select === "off"){
+					        pin[i].hover();
+			            }
+		            }
+			    }
+			    else{document.addEventListener('mousemove', btnInfo, false);
+                document.addEventListener('mousedown', clickDown, false);}
+		    }
 		btnStatus = "none";
 	}
 	// sliding bar for frequency
@@ -806,7 +789,6 @@ function release(event){
  		}
  	}
 };
-
 // button on canvas, now user needs to select pin
 function selectPin(event){
 	ctxActive.clearRect(0,0,canvasActive.width,canvasActive.height);
@@ -819,22 +801,21 @@ function selectPin(event){
 	// drawLine(x,y,btn[len-1]);
 	for (var i = 0; i < pinlen; i++){
 		if (btnType.text === "pwm" && pin[i].PWM == "yes"){
-			hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+			pin[i].hover();
 		}
 		else if (pin[i].type === pinType && pin[i].select === "off"){
-			hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+			pin[i].hover();
 		}
 		if (x >= pin[i].x && x <= pin[i].endX && y >= pin[i].y && 
 			y <= pin[i].endY && pin[i].select === "off"){
 			if ((btnType.text === "pwm" && pin[i].PWM == "yes") || pin[i].type === pinType){
 				drawBtn(75,15,btn[len-1].x,btn[len-1].y,ctxActive,btnType, pin[i].s,
 				pin[i].id,1,false);
-				hover(pin[i].x,pin[i].y,pin[i].w,pin[i].h);
+				pin[i].hover();
 			}
 		}
 	}
 };
-
 function pinSelected(event){
 	var coord = Position(event);
 	var x = coord[0];
@@ -865,39 +846,31 @@ function pinSelected(event){
 	}
     // if nothing selected
 	if (selected != true){
-		if (btnType.input === "on"){
-			ctxBase.fillStyle= 'red';
-			ctxBase.font = '12pt Andale Mono';
-			ctxBase.fillText("select " + btnType.article, BBposX + 10, BBposY-25);
-			document.addEventListener('mousemove',selectPin, false);
-		}
-		else {
 			ctxBTN.fillStyle = 'rgb(225,225,225)';
 			ctxBTN.fillRect(btn[len-1].x -2,btn[len-1].y - 2,btnWidth + 2,btnHeight+3);
-			btn.splice(btn.length-1,1);
+			btn.pop;
+			btnCount--
 			snapPosPin.y = snapPosPin.y - btnHeight*1.5;
-		} 
 	}
 	else {
-		createCanvas(pin[btn[len-1].pinNum]);
+		createCanvas(pin[btn[len-1].pinNum]); newPin = 'active';
+		currentPin = btn[len-1].pinNum;
 		if (btnType.text === "usr leds"){
-			newPin = 'active'; currentPin = btn[len-1].pinNum;
 			btn[len-1].color = ledBTN.color; btn[len-1].offColor = ledBTN.offColor;
 			pin[btn[len-1].pinNum].color = ledColor[0];
 			ledColor.splice(0,1);
 			drawWireLEDs(pin[btn[len-1].pinNum],len-1);
-			on(btn[len-1]);
+			btn[len-1].on();
 			bar[lenBar] = new createBar(len-1, btn[len-1].pinNum, btn[len-1].color, 
 				ledBTN.barColor,"freq");
 			btn[len-1].bar = lenBar;
 			drawBar();
 		}
 		else if (btnType.text === "analog"){
-			newPin = 'active'; currentPin = btn[len-1].pinNum;
 			pin[btn[len-1].pinNum].color = analogColor[0];
 			analogColor.splice(0,1);
 			btn[len-1].color = analogBTN.color; btn[len-1].offColor = analogBTN.offColor;
-			drawWireAnalogPin(pin[btn[len-1].pinNum],len-1); on(btn[len-1]);
+			drawWireAnalogPin(pin[btn[len-1].pinNum],len-1); btn[len-1].on();
 		}
 		else{ // digital
 			pin[btn[len-1].pinNum].subType = btnType.text;
@@ -905,40 +878,31 @@ function pinSelected(event){
 			    pin[btn[len-1].pinNum].color = inputColor[0];
 			    inputColor.splice(0,1);
 			    drawWireDigitalPin(pin[btn[len-1].pinNum],len-1);
-//		 	    drawLED(pin[btn[len-1].pinNum]);
 			    btn[len-1].color = inputBTN.color; btn[len-1].offColor = inputBTN.offColor;
-			    on(btn[len-1]);createOutput();}
+			    pin[btn[len-1].pinNum].change = false; pin[btn[len-1].pinNum].prev = "off";
+			    btn[len-1].on();
+			}
 			else if (btnType.text === "output"){
 			    pin[btn[len-1].pinNum].color = outputColor[0];
 			    outputColor.splice(0,1);
 			    drawWireDigitalPin(pin[btn[len-1].pinNum],len-1);
-			    newPin = 'active';
 			    btn[len-1].color = outputBTN.color; btn[len-1].offColor = outputBTN.offColor;
-				if (btnType.input === "on"){
-					pin[btn[len-2].pinNum].output = pin[btn[len-1].pinNum].id;
-					pin[btn[len-1].pinNum].input = "yes";
-					currentPin = btn[len-2].pinNum;
-                    outputBTN.input = "off";
-					// btn[len-1].input = pin[btn[len-2].pinNum].output
-				}
-				else{on(btn[len-1]); pin[btn[len-1].pinNum].input = "none"; 
-				currentPin = btn[len-1].pinNum;
+                btn[len-1].on(); 
 			    bar[lenBar] = new createBar(len-1, btn[len-1].pinNum, btn[len-1].color, 
 			    outputBTN.barColor,"freq");
 			    btn[len-1].bar = lenBar;
-			    drawBar();}
+			    drawBar();
 			}
-			else {
-			pin[btn[len-1].pinNum].color = pwmColor[0];
-			pwmColor.splice(0,1);
-			drawWireDigitalPin(pin[btn[len-1].pinNum],len-1);
-			newPin = 'active'; currentPin = btn[len-1].pinNum;
-			btn[len-1].color = pwmBTN.color; btn[len-1].offColor = pwmBTN.offColor;
-			on(btn[len-1]);
-			bar[lenBar] = new createBar(len-1, btn[len-1].pinNum, btn[len-1].color, 
+			else { // pwm
+			    pin[btn[len-1].pinNum].color = pwmColor[0];
+			    pwmColor.splice(0,1);
+			    drawWireDigitalPin(pin[btn[len-1].pinNum],len-1);
+			    btn[len-1].color = pwmBTN.color; btn[len-1].offColor = pwmBTN.offColor;
+			    btn[len-1].on();
+			    bar[lenBar] = new createBar(len-1, btn[len-1].pinNum, btn[len-1].color, 
 			    pwmBTN.barColor,"PWM");
-			btn[len-1].bar = lenBar;
-			drawBar();
+			    btn[len-1].bar = lenBar;
+			    drawBar();
 			}
 		} 
 		if (len === 1){
@@ -954,132 +918,97 @@ function pinSelected(event){
 	drawToGraph(btn[len-1]);
 	clicked(event);
 };
-
-function createOutput(){
-	document.removeEventListener('mousemove', btnInfo, false);
-	document.removeEventListener('mousedown', clickDown,false);
-	var len = btn.length;
-	btn.push(new createBtn(btnX + 70,snapPosPin.y,btnType.text));
-	drawBtn(75,15,btnX + 70,snapPosPin.y,ctxBTN,outputBTN,13,'output',1,false);
-	drawLink(btn[len-1],btn[len]);
-	snapPosPin.y += btnHeight*1.5;
-	btnType = outputBTN;
-	btnType.input = "on";
- 	ctxBase.fillStyle= 'red';
-	ctxBase.font = '12pt Andale Mono';
-	ctxBase.fillText("select " + btnType.article, BBposX + 10, BBposY-25);
-	document.addEventListener('mousemove',selectPin, false);
-};
-
 // *************************
 // * LED/VOLTAGE FUNCTIONS *
 // *************************
-
-// draw LEDs		
-function drawLED(led){
-    function doInputRead(){inputRead(led);}
-
-    // clear canvas
-    console.log('drawing led')
-    var data = {freq: led.freq, power: led.power, 
-  		id: led.id, num: led.num, state: led.HIGH,
-  		output: led.output, type: led.type, subType: led.subType};
-     led.ctx.clearRect(0,0,led.canvas.width,led.canvas.height);
-     led.ctx.strokeStyle = ('rgb(245,245,245)');
-	 led.ctx.strokeRect(btn[led.btn].ledX,btn[led.btn].ledY,5,10);
-    if (led.type === 'analog'){
-        if (led.power === 'on'){
-            ledLight(btn[led.btn].ledX,btn[led.btn].ledY,led.ctx)
+// draw LEDs	
+createPin.prototype.drawLED = function(){
+  	// clear canvas
+    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+    this.ctx.strokeStyle = ('rgb(245,245,245)');
+	this.ctx.strokeRect(btn[this.btn].ledX,btn[this.btn].ledY,5,10);
+    if (this.type === 'analog'){
+        if (this.power === 'on'){
+            ledLight(btn[this.btn].ledX,btn[this.btn].ledY,this.ctx);
         }
     }
-    else if (led.subType === 'input'){
-        console.log(led.input + ' ' + led.output);
-        if (led.power === 'on'){
-            ledLight(btn[led.btn].ledX,btn[led.btn].ledY,led.ctx)
-            led.check = setInterval(doInputRead, 100);
-            led.voltCurrent = 5;
+    else if (this.subType === 'input'){
+        if (this.change == true && this.prev == "off" && this.power == "on"){
+                ledLight(btn[this.btn].ledX,btn[this.btn].ledY,this.ctx);
         }
-        else{clearInterval(led.check); led.voltCurrent = 0;}
+        else if (this.power == "off"){this.prev = "off";}
     }
     else{
-	if (led.type === "usr leds"){
-     	var i = led.number;
-     	USRcontext[i].clearRect(0,0,USRcanvas[i].width,USRcanvas[i].height);
+	    if (this.type === "usr leds"){
+     	    var i = this.number;
+     	    USRcontext[i].clearRect(0,0,USRcanvas[i].width,USRcanvas[i].height);
+        }
+	    if (this.freq === 0 && this.power === 'on'){
+	 	    this.voltCurrent = 3.3;
+            pinChange(this);
+		    if (this.type === "usr leds"){
+ 			    gradientLight(this.x,this.y,this.w,this.h, USRcontext[i]);
+ 		    }
+		    ledLight(btn[this.btn].ledX,btn[this.btn].ledY,this.ctx);
+	    }
+	    else if (this.power === 'on'){ 
+	 	    if (this.subType != "pwm"){
+ 		        if (this.HIGH === 0){
+ 			        this.HIGH = 1;
+ 			        if (this.type === "usr leds"){
+ 				        gradientLight(this.x,this.y,this.w,this.h, USRcontext[i]);
+ 			        }
+ 			        ledLight(btn[this.btn].ledX,btn[this.btn].ledY,this.ctx)
+ 			        this.voltCurrent = 3.3;
+                    pinChange(this);
+		        }
+ 		        else {
+ 			        this.HIGH = 0;
+ 			        this.voltCurrent = 0;
+                    pinChange(this); 
+ 		        }
+ 	        }
+ 	        else { pinChange(this); ledLight(btn[this.btn].ledX,btn[this.btn].ledY,this.ctx)}
+ 	    }
+ 	    else{pinChange(this); this.voltCurrent = 0; this.state = 1;}   
     }
-	 if (led.freq === 0 && led.power === 'on'){
-	 	 led.voltCurrent = 5;
-          console.log(data.output);
-          pinChange(data);
-		 if (led.type === "usr leds"){
- 				gradientLight(led.x,led.y,led.w,led.h, USRcontext[i]);
- 		}
-		ledLight(btn[led.btn].ledX,btn[led.btn].ledY,led.ctx);
-	 }
-	 else if (led.power === 'on'){ 
-	 	if (led.subType != "pwm"){
- 		 if (led.HIGH === 0){
- 			led.HIGH = 1;
- 			if (led.type === "usr leds"){
- 				gradientLight(led.x,led.y,led.w,led.h, USRcontext[i]);
- 			}
- 			ledLight(btn[led.btn].ledX,btn[led.btn].ledY,led.ctx)
- 			led.voltCurrent = 5;
-             pinChange(data);
-		 }
- 		else {
- 			led.HIGH = 0;
- 			led.voltCurrent = 0;
-            pinChange(data); 
- 		}
- 	   }
- 	   else{pinChange(data); ledLight(btn[led.btn].ledX,btn[led.btn].ledY,led.ctx)}
- 	  }
- 	else{pinChange(data); led.voltCurrent = 0;}   
-    }
-};
-      		
+};  		
+createUSR.prototype.drawLED = createPin.prototype.drawLED;
+
 // make LED blink	
 function blink(pin){
       	clearInterval(pin.blinking);
-      	pin.blinking = setInterval(function(){drawLED(pin)}, pin.freq);
+      	pin.blinking = setInterval(function(){pin.drawLED()}, pin.freq);
 };
-
 function getVoltage(pin){
+    var data =  {num: pin.num, id: pin.id, power: pin.power};
 	if (pin.type === "analog"){
-        var data =  {num: pin.num, id: pin.id, power: pin.power};
- 		pin.getVoltage = setInterval(function(){start(data)}, 50);
+ 		pin.getVoltage = setInterval(function(){getAnalog(data)}, 50);
 	}
 	else if (pin.subType === "pwm"){
-		pin.counter = 0;
 		pin.getVoltage = setInterval(function(){pwmCycle(pin)}, 50);
-}
-	else{pin.getVoltage = setInterval(function(){addVoltage(pin)}, 50);}
+    }
+	else if (pin.subType === "input"){
+	    pin.getVoltage = setInterval(function(){inputRead(data)}, 50);
+	}
+	else { pin.getVoltage = setInterval(function(){addVoltage(pin)}, 50);}
 };
-
 function addVoltage(pin){
 	pin.volt.push(pin.voltCurrent);
 };
-
 function pwmCycle(pin){
     if (pin.power === "on"){
-	pin.volt.push(5*pin.freq);}
+	    pin.volt.push(3.3*pin.freq);
+    }
     else{pin.volt.push(0);};
-}
-
-function zeroVolt(data){
-    pin[data.num].volt.push(0);
-}
-
-function inputRead(pin){
-    console.log('here')
-    var data = {id: pin.id, output: pin.output};
-    checkInput(data);
-}
+};
+function zeroVolt(num){
+    pin[num].volt.push(0);
+};
 
 // ********************
 // * SLIDER FUNCTIONS * --> also in mousedown and mouseup functions
 // ********************
-
 //  moves slider
 function slideBar(event){
    var coord = Position(event);
@@ -1089,7 +1018,7 @@ function slideBar(event){
    var len = bar.length;
     for (i = 0; i<len; i++){
 	    if (bar[i].move === 'on'){
-			bar[i].sliderX = x-5;
+		    bar[i].sliderX = x-5;
     		if(bar[i].sliderX < bar[i].barLocX+2){ 
     			bar[i].sliderX = bar[i].barLocX+2;
     			bar[i].frequency = 0;
@@ -1097,12 +1026,14 @@ function slideBar(event){
     		else if (bar[i].sliderX > bar[i].barLength + bar[i].barLocX-12){
     			bar[i].sliderX = bar[i].barLength + bar[i].barLocX - 12;
     			if (bar[i].type === "PWM"){
-    			bar[i].frequency = 1;
+    			    bar[i].frequency = 1;
     			}
     			else{bar[i].frequency = 10;}
-    			}
-            else{ if (bar[i].type === "PWM"){
- 				bar[i].frequency = ((bar[i].sliderX - bar[i].barLocX -2)/140).toPrecision(2);}
+    		}
+            else{ 
+                if (bar[i].type === "PWM"){
+ 				    bar[i].frequency = ((bar[i].sliderX - bar[i].barLocX -2)/140).toPrecision(2);
+                }
  			    else{bar[i].frequency = ((bar[i].sliderX - bar[i].barLocX -2)/14).toPrecision(2);}
             }
     		if (bar[i].type === "PWM"){
@@ -1110,13 +1041,14 @@ function slideBar(event){
     			bar[i].text = bar[i].frequency.toString();
     		}
     		else{pin[bar[i].pin].freq = bar[i].frequency*1000;
-    			bar[i].text = bar[i].frequency.toString() + ' s';}
+    			bar[i].text = bar[i].frequency.toString() + ' s';
+    		}
     		drawBar();
 			if (pin[bar[i].pin].freq != 0 && pin[bar[i].pin].power === 'on'){
   				blink(pin[bar[i].pin]);
   			} 
   			else if (pin[bar[i].pin].power === 'on'){
-  				drawLED(pin[bar[i].pin]);
+  				pin[bar[i].pin].drawLED();
   				var data = {freq: pin[bar[i].pin].freq, power: pin[bar[i].pin].power, 
   				id: pin[bar[i].pin].id, num: pin[bar[i].pin].num, state: pin[bar[i].pin].HIGH,
   				output: pin[bar[i].pin].output, type: pin[bar[i].pin].type,
@@ -1125,12 +1057,10 @@ function slideBar(event){
   			}
   		}
     }
-}
-	
+};	
 // *******************
 // * GRAPH FUNCTIONS *
 // *******************
-
 // plot the given point
 function plot(xPoint,yPoint,pin){
 	var coord = scale(xPoint,yPoint);
@@ -1144,7 +1074,6 @@ function plot(xPoint,yPoint,pin){
 	pin.ctxGraph.stroke();
     prevPoint = [x,y];
 };
-
 // scale the point to reflect zoom
 function scale(x,y){
 	var xPoint = x * xScale;	
@@ -1152,14 +1081,12 @@ function scale(x,y){
 	var coord = [xPoint,yPoint];
 	return coord;
 };
-
 // redraw the canvasGraph with zoom
 function zooming(event){
 	ctxGraph[0].clearRect(0,0,canvasGraph[0].width,canvasGraph[0].height);
 	drawGraph();
 	document.removeEventListener('mouseup', zooming, false);
 };
-
 // start recording data
 function setTimer(){
 	status = "on";
@@ -1168,22 +1095,15 @@ function setTimer(){
 	timeValues = [];
 	timer = setInterval(play, 50);
 };
-
 // collect each point for  the given interval
 function play(){
-//     var pinlen = analogPin.length;
-//     for(i=0;i<pinlen; i++){
-//         if (analogPin[i].power==="on"){ //***********************************************
-// 	    start(analogPin[i].id);
-//         }
-//     }
 	ctxGraph[0].clearRect(0,0,canvasGraph[0].width,canvasGraph[0].height);
 	var len = timeValues.length;
 	timeValues[len] = timeCount/100;
 	timeCount += 5;
 	drawGraph();
 	if (timeCount > 375){
-	interval += 5;
+	    interval += 5;
 	}
 };
 
@@ -1204,9 +1124,6 @@ function stop(event){
 function record(event){
 	if (status != "on"){
 		setTimer();
-	}
-	else {
-	//	drawGraph();
 	}
 	document.removeEventListener('mouseup', record, false);
 };
@@ -1235,7 +1152,6 @@ function createBtn(x,y,type){
 	this.LED = false; this.x = x; this.y = y; this.w = 75; this.h = 15;
 	this.type = type; this.xOnOff = btnX + btnWidth - 5; this.yOnOff = y;
 	this.ledX = x - 10; this.ledY = y + 2.5; this.status = "off"; this.name;
-	return;
 };
 
 // user light properties
@@ -1244,7 +1160,7 @@ function createUSR(x,y,number,id){
     this.endY = (this.y + 18); this.power = 'on'; this.number = number;
     this.freq = 0; this.select = "off"; this.volt = [];
     this.HIGH = 1; this.id = id; this.blinking = 0; this.pinSelect = 'off';
-	this.type = 'usr leds'; this.s = 22; this.time = []; return;
+	this.type = 'usr leds'; this.s = 22; this.time = [];
 };
     
 // slider bar properties, not necessarily connected to led
@@ -1257,8 +1173,7 @@ function createBar(button,pin,outline,barColor,type) {
 	if (type === "PWM"){
 		this.text = (this.frequency.toString());
 	}
-	else{this.text = (this.frequency.toString() + ' s');};
-	return;
+	else { this.text = (this.frequency.toString() + ' s');}
 };
 
 // pins on beaglebone
@@ -1267,16 +1182,8 @@ function createPin(x,y,id,type,num){
 	this.endY = y + 7; this.id = id; this.select = "off"; this.type = type; this.freq = 0;
 	this.power = "on"; this.subType = "none"; this.num = num; this.s = 18; this.HIGH = 1;
 	this.volt = []; this.time = [];
-	return;
 };
 
-//// pins on breadboard --> hasn't been implemented yet
-//// function createBreadBPin(x,y,id){
-//// 	this.x = x; this.y = y; this.w = 5; this.h = 5; this.id; this.endX = x+5; 
-//// 	this.endY = y + 5; return;
-//// };
-//
-//
 // *************************
 // * ALL DRAWING FUNCTIONS *
 // *************************
@@ -1289,20 +1196,20 @@ function welcomeMessage(color){
 	ctxActive.fillRect(canvasBase.width/4, canvasBase.height/4, 
 	canvasBase.width/2, canvasBase.height/2);
 	ctxActive.fillStyle = color;
-	ctxActive.font = '12pt Andale Mono';
+	ctxActive.font = '12pt Andale Mono, Courier';
 	ctxActive.fillText('X',canvasBase.width*6/8 -20,canvasBase.height/4+20);
 	ctxActive.fillStyle = 'white';
-	ctxActive.font = '13pt Andale Mono';
+	ctxActive.font = '13pt Andale Mono, Courier';
 	ctxActive.fillText('Welcome to the beaglebone user interface!',canvasBase.width/4 +20,canvasBase.height/4+25);
-	ctxActive.font = '10pt Andale Mono';
-	ctxActive.fillText('This interface allows you to play with analog to digital converters,',canvasBase.width/4 +25,canvasBase.height/4+55);
-	ctxActive.fillText('digital pins (including inputs, outputs, and pwms), and the user leds',canvasBase.width/4 +25,canvasBase.height/4+70);
-	ctxActive.fillText('located at the top of the board. Hovering over the buttons indicates',canvasBase.width/4 +25,canvasBase.height/4+85);
-	ctxActive.fillText('which pins correspond to what type. Click and drag the button within',canvasBase.width/4 +25,canvasBase.height/4+100);
-	ctxActive.fillText('the white rectangle and select a pin. The input button requires both an',canvasBase.width/4 +25,canvasBase.height/4+115);
-	ctxActive.fillText('input and an output. The graph to the right will display the voltage',canvasBase.width/4 +25,canvasBase.height/4+130);
-	ctxActive.fillText('of the corresponding pin. Use the zoom in or zoom out to alter the graph,',canvasBase.width/4 +25,canvasBase.height/4+145);
-	ctxActive.fillText('stop to stop recording voltages, and play again to reset. Enjoy!',canvasBase.width/4 +25,canvasBase.height/4+160);
+	ctxActive.font = '10pt Andale Mono, Courier';
+	ctxActive.fillText('This interface allows you to play with analog to digital converters,',canvasBase.width/4 +21,canvasBase.height/4+55);
+	ctxActive.fillText('digital pins (including inputs, outputs, and pwms), and the user leds',canvasBase.width/4 +21,canvasBase.height/4+70);
+	ctxActive.fillText('located at the top of the board. Hovering over the buttons indicates',canvasBase.width/4 +21,canvasBase.height/4+85);
+	ctxActive.fillText('which pins correspond to what type. Click and drag the button within',canvasBase.width/4 +21,canvasBase.height/4+100);
+	ctxActive.fillText('the white rectangle and select a pin. The graph to the right will',canvasBase.width/4 +21,canvasBase.height/4+115);
+	ctxActive.fillText('display the voltage of the corresponding pin. Use the zoom in or zoom',canvasBase.width/4 +21,canvasBase.height/4+130);
+	ctxActive.fillText('out to alter the graph, stop to stop recording voltages, and play',canvasBase.width/4 +21,canvasBase.height/4+145);
+	ctxActive.fillText('again to reset. Just make sure your board is wired correctly. Enjoy!',canvasBase.width/4 +23,canvasBase.height/4+160);
 	document.addEventListener('click', exit, false);
 	document.addEventListener('mousemove', exitHover, false);
 }
@@ -1317,108 +1224,111 @@ function drawButtons(){
 };
 
 function roundRect(btn, w, h, radius, context, stroke){
-  var x = btn.x; var y = btn.y; var color = btn.color;
-  var text = btn.text; var s = btn.s;
-  var r = x + w;
-  var b = y + h;
-  context.beginPath();
-  context.lineWidth="1";
-  context.moveTo(x+radius, y);
-  context.lineTo(r-radius, y);
-  context.quadraticCurveTo(r, y, r, y+radius);
-  context.lineTo(r, y+h-radius);
-  context.quadraticCurveTo(r, b, r-radius, b);
-  context.lineTo(x+radius, b);
-  context.quadraticCurveTo(x, b, x, b-radius);
-  context.lineTo(x, y+radius);
-  context.quadraticCurveTo(x, y, x+radius, y);
-  if (stroke === true){
-  	context.strokeStyle = color;
-  	context.stroke();
-  	context.fillStyle= 'white';
-	context.fill();
-	context.fillStyle = color;
-  }
-  else{  context.strokeStyle = color;
-  	context.stroke();
-  	context.fillStyle = color; context.fill()
-  	context.fillStyle= 'white';
-  	};
-    context.font = '10pt Andale Mono';
+    var x = btn.x; var y = btn.y; var color = btn.color;
+    var text = btn.text; var s = btn.s;
+    var r = x + w;
+    var b = y + h;
+    context.beginPath();
+    context.lineWidth="1";
+    context.moveTo(x+radius, y);
+    context.lineTo(r-radius, y);
+    context.quadraticCurveTo(r, y, r, y+radius);
+    context.lineTo(r, y+h-radius);
+    context.quadraticCurveTo(r, b, r-radius, b);
+    context.lineTo(x+radius, b);
+    context.quadraticCurveTo(x, b, x, b-radius);
+    context.lineTo(x, y+radius);
+    context.quadraticCurveTo(x, y, x+radius, y);
+    if (stroke === true){
+  	    context.strokeStyle = color;
+  	    context.stroke();
+  	    context.fillStyle= 'white';
+	    context.fill();
+	    context.fillStyle = color;
+    }
+    else {  
+        context.strokeStyle = color;
+  	    context.stroke();
+  	    context.fillStyle = color; context.fill()
+  	    context.fillStyle= 'white';
+  	}
+    context.font = '10pt Andale Mono, Courier';
 	context.fillText(text, x + s, y+12);
 }
 // draw individual button while dragging and then permanently on different canvas
 function drawBtn(w,h,x,y,context,btn,s,text,radius,stroke){
-  var color = btn.color;
-  var r = x + w;
-  var b = y + h;
-  context.beginPath();
-  context.lineWidth="1";
-  context.moveTo(x+radius, y);
-  context.lineTo(r-radius, y);
-  context.quadraticCurveTo(r, y, r, y+radius);
-  context.lineTo(r, y+h-radius);
-  context.quadraticCurveTo(r, b, r-radius, b);
-  context.lineTo(x+radius, b);
-  context.quadraticCurveTo(x, b, x, b-radius);
-  context.lineTo(x, y+radius);
-  context.quadraticCurveTo(x, y, x+radius, y);
-  if (stroke === true){
-  	context.strokeStyle = color;
-  	context.stroke();
-  	context.fillStyle= 'white';
-	context.fill();
-	context.fillStyle = color;
-  }
-  else{ context.strokeStyle = color;
-  	context.stroke();
-  	context.fillStyle = color; context.fill()
-  	context.fillStyle= 'white';
-  	};
-    context.font = '10pt Andale Mono';
+    var color = btn.color;
+    var r = x + w;
+    var b = y + h;
+    context.beginPath();
+    context.lineWidth="1";
+    context.moveTo(x+radius, y);
+    context.lineTo(r-radius, y);
+    context.quadraticCurveTo(r, y, r, y+radius);
+    context.lineTo(r, y+h-radius);
+    context.quadraticCurveTo(r, b, r-radius, b);
+    context.lineTo(x+radius, b);
+    context.quadraticCurveTo(x, b, x, b-radius);
+    context.lineTo(x, y+radius);
+    context.quadraticCurveTo(x, y, x+radius, y);
+    if (stroke === true){
+  	    context.strokeStyle = color;
+  	    context.stroke();
+  	    context.fillStyle= 'white';
+	    context.fill();
+	    context.fillStyle = color;
+    }
+    else { 
+        context.strokeStyle = color;
+  	    context.stroke();
+  	    context.fillStyle = color; context.fill()
+  	    context.fillStyle= 'white';
+  	}
+    context.font = '10pt Andale Mono, Courier';
 	context.fillText(text, x + s, y+12);
 };
-
-function hover(x,y,w,h){
+createPin.prototype.hover = function(){
 	ctxActive.fillStyle = 'RGBA(255,255,255,.5)';
-	ctxActive.fillRect(x,y,w,h);
+	ctxActive.fillRect(this.x,this.y,this.w,this.h);
 };
+
+createUSR.prototype.hover = createPin.prototype.hover;
 
  // draw slider bars                       
 function drawBar(){
-		var len = bar.length;
-		ctxBar.clearRect(0,0,canvasBar.width,canvasBar.height);
-		for (var i = 0; i<len; i++){
-    		ctxBar.fillStyle= 'rgb(205,205,205)';
- 			ctxBar.fillRect(bar[i].barLocX,bar[i].barLocY, bar[i].barLength, bar[i].barHeight);
- 			ctxBar.fillStyle= bar[i].barColor;
- 			ctxBar.fillRect(bar[i].barLocX,bar[i].barLocY, bar[i].sliderX - bar[i].barLocX, 15);
- 			ctxBar.fillStyle= 'rgb(30,30,30)';
- 			ctxBar.fillRect(bar[i].sliderX-2,bar[i].barLocY,14,15);
- 			ctxBar.strokeStyle= bar[i].outline;
- 			ctxBar.lineWidth = 2;
- 			ctxBar.strokeRect(bar[i].barLocX,bar[i].barLocY, bar[i].barLength, bar[i].barHeight);
- 			ctxBar.fillStyle= 'black';
- 			ctxBar.strokeStyle = 'rgb(225,225,225)';
- 			ctxBar.lineWidth = 6;
- 			ctxBar.font = '12pt Andale Mono';
- 			ctxBar.strokeText(bar[i].text, bar[i].barLength + bar[i].barLocX + 10, 
-    			bar[i].barHeight + bar[i].barLocY -2);	
-    		ctxBar.fillText(bar[i].text, bar[i].barLength + bar[i].barLocX + 10, 
-    			bar[i].barHeight + bar[i].barLocY -2);	
-    	}
- };
+	var len = bar.length;
+	ctxBar.clearRect(0,0,canvasBar.width,canvasBar.height);
+	for (var i = 0; i<len; i++){
+    	ctxBar.fillStyle= 'rgb(205,205,205)';
+ 		ctxBar.fillRect(bar[i].barLocX,bar[i].barLocY, bar[i].barLength, bar[i].barHeight);
+ 		ctxBar.fillStyle= bar[i].barColor;
+ 		ctxBar.fillRect(bar[i].barLocX,bar[i].barLocY, bar[i].sliderX - bar[i].barLocX, 15);
+ 		ctxBar.fillStyle= 'rgb(30,30,30)';
+ 		ctxBar.fillRect(bar[i].sliderX-2,bar[i].barLocY,14,15);
+ 		ctxBar.strokeStyle= bar[i].outline;
+ 		ctxBar.lineWidth = 2;
+ 		ctxBar.strokeRect(bar[i].barLocX,bar[i].barLocY, bar[i].barLength, bar[i].barHeight);
+ 		ctxBar.fillStyle= 'black';
+ 		ctxBar.strokeStyle = 'rgb(225,225,225)';
+ 		ctxBar.lineWidth = 6;
+ 		ctxBar.font = '12pt Andale Mono, Courier';
+ 		ctxBar.strokeText(bar[i].text, bar[i].barLength + bar[i].barLocX + 10, 
+   			bar[i].barHeight + bar[i].barLocY -2);	
+   		ctxBar.fillText(bar[i].text, bar[i].barLength + bar[i].barLocX + 10, 
+   			bar[i].barHeight + bar[i].barLocY -2);	
+    }
+};
  
 
 // draw line from button to pin/LED while selecting pin, make this the same as the wire
 function drawLine(x,y,button){
-      ctxActive.clearRect(0,0,canvasActive.width,canvasActive.height);
-      ctxActive.beginPath();
-      ctxActive.moveTo(button.x + button.w, button.y + button.h/2);
-      ctxActive.lineTo(x, y);
-      ctxActive.strokeStyle = '#ff0000';
-      ctxActive.lineWidth = 2;
-      ctxActive.stroke();
+    ctxActive.clearRect(0,0,canvasActive.width,canvasActive.height);
+    ctxActive.beginPath();
+    ctxActive.moveTo(button.x + button.w, button.y + button.h/2);
+    ctxActive.lineTo(x, y);
+    ctxActive.strokeStyle = '#ff0000';
+    ctxActive.lineWidth = 2;
+    ctxActive.stroke();
 };
 
 // draw wire from switch/slider to pin/LED once selected
@@ -1433,7 +1343,6 @@ function drawWireLEDs(pin,i){
     ctxBTN.lineWidth = 2;
 	ctxBTN.stroke();
 };
-
 // draw wire from button to pin
 function drawWireAnalogPin(pin,i){
 	ctxBTN.beginPath();
@@ -1445,7 +1354,6 @@ function drawWireAnalogPin(pin,i){
 	ctxBTN.strokeStyle = pin.color;
 	ctxBTN.stroke();
 };
-
 function drawWireDigitalPin(pin,i){
 	ctxBTN.beginPath();
 	if (pin.subType == "input"){var s = -2;}
@@ -1459,7 +1367,6 @@ function drawWireDigitalPin(pin,i){
 	ctxBTN.lineWidth = 2;
 	ctxBTN.stroke();
 };
-
 function drawLink(btn1,btn2,pin){
 	ctxBTN.beginPath();
 	ctxBTN.moveTo(btn1.x + btn1.w/2,btn1.y + btnHeight);
@@ -1469,7 +1376,6 @@ function drawLink(btn1,btn2,pin){
 	ctxBTN.lineWidth = 2;
 	ctxBTN.stroke();
 };
-
 function drawToGraph(btn){
 	ctxBTN.beginPath();
 	ctxBTN.moveTo(BBposX+309,graphLinePos);
@@ -1479,7 +1385,6 @@ function drawToGraph(btn){
 	ctxBTN.stroke();
 	graphLinePos += 4;
 };
-
 // USR led lights
 function gradientLight(xstart,ystart,width,height,context){
       	var x1 = xstart + width/2;   // x of 1. circle center point
@@ -1501,86 +1406,85 @@ function gradientLight(xstart,ystart,width,height,context){
  		context.fillRect(xstart,ystart, width, height);
  		context.restore();
 };
-
-// on switch    	 	
-function on(btn){
-  var x = btn.xOnOff; var y = btn.yOnOff;
-  var color = btn.color; var w = 50; var h = 15;
-  var offColor = btn.offColor;
-  var r = x + w;
-  var b = y + h;
-  var radius = 1;
-  ctxBTN.beginPath();
-  ctxBTN.lineWidth="1";
-  ctxBTN.moveTo(x+radius, y);
-  ctxBTN.lineTo(r-radius, y);
-  ctxBTN.quadraticCurveTo(r, y, r, y+radius);
-  ctxBTN.lineTo(r, y+h-radius);
-  ctxBTN.quadraticCurveTo(r, b, r-radius, b);
-  ctxBTN.lineTo(x+radius, b);
-  ctxBTN.quadraticCurveTo(x, b, x, b-radius);
-  ctxBTN.lineTo(x, y+radius);
-  ctxBTN.quadraticCurveTo(x, y, x+radius, y);
-  ctxBTN.strokeStyle = color; 
-  ctxBTN.stroke();
-  ctxBTN.fillStyle = color; 
-  ctxBTN.fill()
-  ctxBTN.fillStyle= 'white';
-  ctxBTN.font = '10pt Andale Mono';
-  ctxBTN.fillText('on', x + 4, y+12);
-  ctxBTN.beginPath();
-  ctxBTN.moveTo(x+w/2, y);
-  ctxBTN.lineTo(r-radius, y);
-  ctxBTN.quadraticCurveTo(r, y, r, y+radius);
-  ctxBTN.lineTo(r, y+h-radius);
-  ctxBTN.quadraticCurveTo(r, b, r-radius, b);
-  ctxBTN.lineTo(x+w/2, b);
-  ctxBTN.fillStyle = offColor; 
-  ctxBTN.fill()
-  ctxBTN.fillStyle= 'black';
-  ctxBTN.font = '10pt Andale Mono';
-  ctxBTN.fillText('off', x + 26, y+12);
-};
+// on switch  
+createBtn.prototype.on = function(){
+    var x = this.xOnOff; var y = this.yOnOff;
+    var color = this.color; var w = 50; var h = 15;
+    var offColor = this.offColor;
+    var r = x + w;
+    var b = y + h;
+    var radius = 1;
+    ctxBTN.beginPath();
+    ctxBTN.lineWidth="1";
+    ctxBTN.moveTo(x+radius, y);
+    ctxBTN.lineTo(r-radius, y);
+    ctxBTN.quadraticCurveTo(r, y, r, y+radius);
+    ctxBTN.lineTo(r, y+h-radius);
+    ctxBTN.quadraticCurveTo(r, b, r-radius, b);
+    ctxBTN.lineTo(x+radius, b);
+    ctxBTN.quadraticCurveTo(x, b, x, b-radius);
+    ctxBTN.lineTo(x, y+radius);
+    ctxBTN.quadraticCurveTo(x, y, x+radius, y);
+    ctxBTN.strokeStyle = color; 
+    ctxBTN.stroke();
+    ctxBTN.fillStyle = color; 
+    ctxBTN.fill()
+    ctxBTN.fillStyle= 'white';
+    ctxBTN.font = '10pt Andale Mono, Courier';
+    ctxBTN.fillText('on', x + 4, y+12);
+    ctxBTN.beginPath();
+    ctxBTN.moveTo(x+w/2, y);
+    ctxBTN.lineTo(r-radius, y);
+    ctxBTN.quadraticCurveTo(r, y, r, y+radius);
+    ctxBTN.lineTo(r, y+h-radius);
+    ctxBTN.quadraticCurveTo(r, b, r-radius, b);
+    ctxBTN.lineTo(x+w/2, b);
+    ctxBTN.fillStyle = offColor; 
+    ctxBTN.fill()
+    ctxBTN.fillStyle= 'black';
+    ctxBTN.font = '10pt Andale Mono, Courier';
+    ctxBTN.fillText('off', x + 26, y+12);
+}
 
 // off switch
-function off(btn){
-  var x = btn.xOnOff; var y = btn.yOnOff;
-  var color = btn.color; var w = 50; var h = 15;
-  var offColor = btn.offColor;
-  var r = x + w;
-  var b = y + h;
-  var radius = 1;
-  ctxBTN.beginPath();
-  ctxBTN.lineWidth="1";
-  ctxBTN.moveTo(x+radius, y);
-  ctxBTN.lineTo(r-radius, y);
-  ctxBTN.quadraticCurveTo(r, y, r, y+radius);
-  ctxBTN.lineTo(r, y+h-radius);
-  ctxBTN.quadraticCurveTo(r, b, r-radius, b);
-  ctxBTN.lineTo(x+radius, b);
-  ctxBTN.quadraticCurveTo(x, b, x, b-radius);
-  ctxBTN.lineTo(x, y+radius);
-  ctxBTN.quadraticCurveTo(x, y, x+radius, y);
-  ctxBTN.strokeStyle = color; 
-  ctxBTN.stroke();
-  ctxBTN.fillStyle = color; 
-  ctxBTN.fill()
-  ctxBTN.beginPath();
-  ctxBTN.moveTo(x+w/2, b);
-  ctxBTN.lineTo(x+radius, b);
-  ctxBTN.quadraticCurveTo(x, b, x, b-radius);
-  ctxBTN.lineTo(x, y+radius);
-  ctxBTN.quadraticCurveTo(x, y, x+radius, y);
-  ctxBTN.lineTo(x+w/2, y);
-  ctxBTN.fillStyle = offColor; 
-  ctxBTN.fill();
-  ctxBTN.fillStyle= 'black';
-  ctxBTN.font = '10pt Andale Mono';
-  ctxBTN.fillText('on', x + 5, y+12);
-  ctxBTN.fillStyle= 'white';
-  ctxBTN.font = '10pt Andale Mono';
-  ctxBTN.fillText('off', x + 26, y+12);
-};
+createBtn.prototype.off = function (){
+    var x = this.xOnOff; var y = this.yOnOff;
+    var color = this.color; var w = 50; var h = 15;
+    var offColor = this.offColor;
+    var r = x + w;
+    var b = y + h;
+    var radius = 1;
+    ctxBTN.beginPath();
+    ctxBTN.lineWidth="1";
+    ctxBTN.moveTo(x+radius, y);
+    ctxBTN.lineTo(r-radius, y);
+    ctxBTN.quadraticCurveTo(r, y, r, y+radius);
+    ctxBTN.lineTo(r, y+h-radius);
+    ctxBTN.quadraticCurveTo(r, b, r-radius, b);
+    ctxBTN.lineTo(x+radius, b);
+    ctxBTN.quadraticCurveTo(x, b, x, b-radius);
+    ctxBTN.lineTo(x, y+radius);
+    ctxBTN.quadraticCurveTo(x, y, x+radius, y);
+    ctxBTN.strokeStyle = color; 
+    ctxBTN.stroke();
+    ctxBTN.fillStyle = color; 
+    ctxBTN.fill()
+    ctxBTN.beginPath();
+    ctxBTN.moveTo(x+w/2, b);
+    ctxBTN.lineTo(x+radius, b);
+    ctxBTN.quadraticCurveTo(x, b, x, b-radius);
+    ctxBTN.lineTo(x, y+radius);
+    ctxBTN.quadraticCurveTo(x, y, x+radius, y);
+    ctxBTN.lineTo(x+w/2, y);
+    ctxBTN.fillStyle = offColor; 
+    ctxBTN.fill();
+    ctxBTN.fillStyle= 'black';
+    ctxBTN.font = '10pt Andale Mono, Courier';
+    ctxBTN.fillText('on', x + 5, y+12);
+    ctxBTN.fillStyle= 'white';
+    ctxBTN.font = '10pt Andale Mono, Courier';
+    ctxBTN.fillText('off', x + 26, y+12);
+}
 
 function drawXs(){
 	var len = btn.length;
@@ -1590,23 +1494,20 @@ function drawXs(){
 		ctxActive.fillText('X',btn[i].x - 19,btn[i].y+16);
 	}
 };
-
 function ledLight(x,y,ctx){
- 		var x1 = x + 2.5;  // x of 1. circle center point
-		var y1 = y + 5;  // y of 1. circle center point
-		var r1 = 0.1;    // radius of 1. circle
-		var x2 = x1;   // x of 2. circle center point
-		var y2 = y1;   // y of 2. circle center point
-		var r2 = 15;   // radius of 2. circle
-		var radialGradient =
-    	ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
-		radialGradient.addColorStop(0, 'rgba(0,  225, 255, 1)');
-		radialGradient.addColorStop(1, 'rgba(0, 0, 255, 0)');
-		ctx.fillStyle = radialGradient;
- 		ctx.fillRect(x,y, 5, 10);
-};
-
-
+ 	var x1 = x + 2.5;  // x of 1. circle center point
+	var y1 = y + 5;  // y of 1. circle center point
+	var r1 = 0.1;    // radius of 1. circle
+	var x2 = x1;   // x of 2. circle center point
+	var y2 = y1;   // y of 2. circle center point
+	var r2 = 15;   // radius of 2. circle
+	var radialGradient = ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
+	radialGradient.addColorStop(0, 'rgba(0,  225, 255, 1)');
+	radialGradient.addColorStop(1, 'rgba(0, 0, 255, 0)');
+	ctx.fillStyle = radialGradient;
+ 	ctx.fillRect(x,y, 5, 10);
+}
+;
 // ***************************
 // * GRAPH DRAWING FUNCTIONS *
 // ***************************
@@ -1619,19 +1520,18 @@ function xAxis(){
 	ctxGraph[0].lineWidth = 2;
 	ctxGraph[0].stroke();
 	ctxGraph[0].strokeStyle = "black";
-	ctxGraph[0].font = '12pt Lucinda Grande';
+	ctxGraph[0].font = '12pt Lucinda Grande, Lucida';
 	ctxGraph[0].fillText('Time [s]', axisStartX + 175, axisStartY + 449);
 	ctxGraph[0].save();
 	xTicks();
 };
-
 // draw x tick marks, take into account the interval if timer on 
 function xTicks(){
 	var x = 0;
 	var countX = 0;
 	var xnum = 95;
 	var time = 1;
-	var prec = Math.ceil(Math.log(Math.abs(interval)/100 + 1.1)/Math.LN10) + 1;
+// 	var prec = Math.ceil(Math.log(Math.abs(interval)/100 + 1.1)/Math.LN10) + 1;
 	ctxGraph[0].strokeStyle = "black";
 	while(x <= xWidth + interval){
 		if (axisStartX + x - interval >= zeroX){
@@ -1652,18 +1552,19 @@ function xTicks(){
 		}
 		x += 10;
 		countX += 1;
-	};
-	ctxGraph[0].fillStyle = "black";
-	ctxGraph[0].font = '8pt Lucinda Grande';
-		while(xnum <= xWidth + interval){
-			if (axisStartX + xnum - interval >= zeroX){
-			ctxGraph[0].fillText(time.toPrecision(prec).toString(), 
-			axisStartX + xnum - interval, axisStartY + 220);
-			}
-			xnum += 100;
-			time = (xnum+3)/100;
-		};
-};
+	}
+// x axis time numbers
+// 	ctxGraph[0].fillStyle = "black";
+// 	ctxGraph[0].font = '8pt Lucinda Grande, Lucida';
+// 		while(xnum <= xWidth + interval){
+// 			if (axisStartX + xnum - interval >= zeroX){
+// 			ctxGraph[0].fillText(time.toPrecision(prec).toString(), 
+// 			axisStartX + xnum - interval, axisStartY + 220);
+// 			}
+// 			xnum += 100;
+// 			time = (xnum+3)/100;
+// 		};
+}
 
 // y axis
 function yAxis(){
@@ -1679,7 +1580,7 @@ function yAxis(){
 	ctxGraph[0].lineWidth = 2;
 	ctxGraph[0].stroke();
 	ctxGraph[0].save();
-	ctxGraph[0].font = '12pt Lucinda Grande';
+	ctxGraph[0].font = '12pt Lucinda Grande, Lucida';
 	ctxGraph[0].translate(canvasGraph[0].width/2, canvasGraph[0].height/2);
 	ctxGraph[0].rotate(-0.5 * Math.PI);
 	ctxGraph[0].translate(-canvasGraph[0].width/2, -canvasGraph[0].height/2);
@@ -1703,9 +1604,9 @@ function yAxis(){
 		}
 		y += 10;
 		countY += 1;
-	};
+	}
 	ctxGraph[0].fillStyle = "black";
-	ctxGraph[0].font = '8pt Lucinda Grande';
+	ctxGraph[0].font = '8pt Lucinda Grande, Lucida';
 	while(ynum <= yWidth + 4){
 		text = (volt * zoom).toPrecision(2).toString();
 		if (volt < 0){
@@ -1716,26 +1617,24 @@ function yAxis(){
 		}
 		ynum += 20;
 		volt -= 2*5/20;
-	};
+	}
 };
-
 // draw both axis
 function drawAxis(){
 	yAxis();
 	xAxis();
 };
-
 // draw the zoom in/out, play, and stop button
 function drawGraphBtn(){
 	ctxGraph[0].fillStyle= "black";
-	ctxGraph[0].font = 'bold 21pt Lucinda Grande';
+	ctxGraph[0].font = 'bold 21pt Lucinda Grande, Lucida';
 	// zoom in
 	ctxGraph[0].fillText("+", plus.x, plus.y);
-	ctxGraph[0].font = '30pt Lucinda Grande';
+	ctxGraph[0].font = '30pt Lucinda Grande, Lucida';
 	// zoom out
 	ctxGraph[0].fillText("-", minus.x, minus.y);
 	ctxGraph[0].fillStyle= "black";
-	ctxGraph[0].font = '14pt Lucinda Grande';
+	ctxGraph[0].font = '14pt Lucinda Grande, Lucida';
 	// playBtn button
 	ctxGraph[0].save();
 	if (status === "on"){
@@ -1765,48 +1664,48 @@ function drawGraphBtn(){
 
 // draw all components
 function drawGraph(){
-//console.time("draw graph");
-var pinlen = voltagePin.length;
-var spliced = 'false';
-for (var i=0;i<pinlen;i++){
-	pin[voltagePin[i]].ctxGraph.clearRect(0,0,pin[voltagePin[i]].canvasGraph.width,
-	pin[voltagePin[i]].canvasGraph.height);
-	pin[voltagePin[i]].time = timeValues;
-	if (timeCount <= 375 && (timeValues.length > pin[voltagePin[i]].volt.length) && status === "on"){
-		pin[voltagePin[i]].time = timeValues.slice(timeValues.length - pin[voltagePin[i]].volt.length);
-	}
-	else if (timeCount <= 375 && (timeValues.length < pin[voltagePin[i]].volt.length) && status === "on"){
-		pin[voltagePin[i]].volt = pin[voltagePin[i]].volt.slice(pin[voltagePin[i]].volt.length - timeValues.length);
-	}
-	else if (timeCount>375 && status === "on"){
-		if (spliced === "false"){
-			timeValues.splice(0,1); spliced = "true";}
-		if (pin[voltagePin[i]].volt.length < timeValues.length){
-			pin[voltagePin[i]].time = timeValues.slice(timeValues.length - pin[voltagePin[i]].volt.length);
-         }
-        else{pin[voltagePin[i]].volt.splice(0,1); pin[voltagePin[i]].time = timeValues;}
-	}
-}
+    var pinlen = voltagePin.length;
+    var spliced = 'false';
+    for (var i=0;i<pinlen;i++){
+	    pin[voltagePin[i]].ctxGraph.clearRect(0,0,pin[voltagePin[i]].canvasGraph.width,
+	    pin[voltagePin[i]].canvasGraph.height);
+	    pin[voltagePin[i]].time = timeValues;
+	    if (timeCount <= 375 && (timeValues.length > pin[voltagePin[i]].volt.length) && status === "on"){
+		    pin[voltagePin[i]].time = timeValues.slice(timeValues.length - pin[voltagePin[i]].volt.length);
+	    }
+	    else if (timeCount <= 375 && (timeValues.length < pin[voltagePin[i]].volt.length) && status === "on"){
+		    pin[voltagePin[i]].volt = pin[voltagePin[i]].volt.slice(pin[voltagePin[i]].volt.length - timeValues.length);
+	    }
+	    else if (timeCount>375 && status === "on"){
+		    if (spliced === "false"){
+			    timeValues.splice(0,1); spliced = "true";
+		    }
+		    if (pin[voltagePin[i]].volt.length < timeValues.length){
+			    pin[voltagePin[i]].time = timeValues.slice(timeValues.length - pin[voltagePin[i]].volt.length);
+            }
+            else {
+                var voltLen = pin[voltagePin[i]].volt.length;
+                pin[voltagePin[i]].volt.splice(0,voltLen - timeValues.length); pin[voltagePin[i]].time = timeValues;}
+	    }
+    }
     for (var j = 0; j < pinlen; j++){
         prevPoint = 0; var timeTemp = [];
         var len = pin[voltagePin[j]].volt.length;
-	        for (var i = 0; i < len; i++){
-	        	    if (timeCount>375){
-	                    timeTemp[i] = pin[voltagePin[j]].time[i] - timeValues[0];
-		        	    plot(timeTemp[i],pin[voltagePin[j]].volt[i],pin[voltagePin[j]]);
-	        	    }
-	        	    else{
-		        	    plot(pin[voltagePin[j]].time[i],pin[voltagePin[j]].volt[i],
-		        	    pin[voltagePin[j]]);
-		            }
-	         }
+        for (var i = 0; i < len; i++){
+	        if (timeCount>375){
+	            timeTemp[i] = pin[voltagePin[j]].time[i] - timeValues[0];
+		        plot(timeTemp[i],pin[voltagePin[j]].volt[i],pin[voltagePin[j]]);
+	        }
+	        else {
+		        plot(pin[voltagePin[j]].time[i],pin[voltagePin[j]].volt[i],
+		        pin[voltagePin[j]]);
+		    }
+	    }
     } 
 
 	drawGraphBtn();
 	drawAxis();
-//console.timeEnd("draw graph");
 };
-
 		</script>
     </body>
 </html>
